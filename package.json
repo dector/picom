@@ -1,0 +1,30 @@
+{
+  "name": "picom",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Renderer-independent procedural low-poly mesh toolkit",
+  "exports": {
+    ".": "./src/index.ts",
+    "./three": "./src/three-adapter.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "example": "bun examples/sculpture.ts"
+  },
+  "peerDependencies": {
+    "three": "^0.180.0"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "@types/three": "^0.180.0",
+    "three": "0.180.0",
+    "typescript": "^5.9.0"
+  }
+}
