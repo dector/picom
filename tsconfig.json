@@ -9,5 +9,5 @@
     "types": ["bun"],
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "examples/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "examples/**/*.ts", "playground/src/**/*.ts"]
 }

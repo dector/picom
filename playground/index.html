@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#10151e" />
+    <title>picom / playground</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <a class="brand" href="./">picom<span>/ playground</span></a>
+        <div class="actions">
+          <label class="example-label"><span class="sr-only">Load example</span><select id="examples"><option value="">Examples…</option></select></label>
+          <button id="run" class="primary" title="Run code (Ctrl/⌘ + Enter)">Run <span aria-hidden="true">↗</span></button>
+        </div>
+      </header>
+      <nav class="mobile-tabs" aria-label="Workspace view">
+        <button id="code-tab" aria-pressed="false">Code</button>
+        <button id="preview-tab" aria-pressed="true">Preview</button>
+      </nav>
+      <main class="workspace" data-view="preview">
+        <section class="code-pane" aria-label="Code editor">
+          <div class="panel-heading"><span><i class="dot"></i> model.js</span><label class="live-toggle"><input id="live" type="checkbox" checked /> Auto-run</label></div>
+          <div id="editor"></div>
+          <details class="help"><summary>How it works</summary><p>Write JavaScript. All picom exports are available directly — no imports needed. Finish with <code>return describe(model, { ground: true });</code></p><p>Edits are saved on this device. Ctrl/⌘ + Enter runs immediately. Code runs in a disposable worker with a 3-second limit. Only run code you trust; this is not a security sandbox.</p></details>
+        </section>
+        <section class="preview-pane" aria-label="3D preview">
+          <div class="panel-heading"><span><i class="dot green"></i> Preview</span><div class="preview-actions"><button id="wireframe" aria-pressed="false">Wireframe</button><button id="fit">Fit view</button></div></div>
+          <div id="viewport" aria-label="Interactive model. Drag to orbit, pinch or scroll to zoom."></div>
+          <div class="preview-caption"><span id="model-name">Your next little world.</span><span>Drag to orbit · pinch to zoom</span></div>
+        </section>
+      </main>
+      <footer><span id="status" role="status">Starting…</span><span id="stats"></span></footer>
+      <div id="error" role="alert" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

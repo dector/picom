@@ -15,6 +15,14 @@ bun run typecheck
 bun run example  # prints a desk sculpture as JSON
 ```
 
+## Browser playground
+
+```sh
+bun run playground
+```
+
+A responsive JavaScript editor with live Three.js preview, touch orbit/zoom, examples, and local draft saving. On phones, switch between Code and Preview. Run `bun run playground:build` to build a static site. See [playground/README.md](playground/README.md) for details.
+
 ## Build a model
 
 ```ts
