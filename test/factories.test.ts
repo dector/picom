@@ -51,6 +51,34 @@ test("named palettes work with existing builders and are cloned", () => {
   expect(JSON.parse(JSON.stringify(result))).toEqual(result);
 });
 
+test("Assembly.new creates empty assemblies with independent options", () => {
+  const empty: Assembly = Assembly.new({ name: "empty" });
+  expect(empty).toEqual({
+    name: "empty", category: "default", tags: {}, explode: [0, 0, 0], parts: [],
+  });
+  const options = {
+    name: "body", category: "robot", tags: { kind: "custom" },
+    explode: [0, 0, 1], label: "Robot body",
+  };
+  const result = Assembly.new(options);
+  expect(result).toEqual({ ...options, parts: [] });
+  result.tags.kind = "changed";
+  result.explode[2] = 999;
+  result.parts.push(b(empty, "part", [0, 0, 0], [1, 1, 1]));
+  expect(options.tags.kind).toBe("custom");
+  expect(options.explode).toEqual([0, 0, 1]);
+  expect(Assembly.new(options).parts).toEqual([]);
+  const model = Model.new();
+  expect(model.addAssembly(result)).toBe(result);
+});
+
+test("Assembly.new validates path segments", () => {
+  expect(() => Assembly.new({ name: "" })).toThrow();
+  expect(() => Assembly.new({ name: "bad/name" })).toThrow();
+  expect(() => Assembly.new({ name: "body", category: "" })).toThrow();
+  expect(() => Assembly.new({ name: "body", category: "bad/category" })).toThrow();
+});
+
 test("Assembly.from accepts zero or multiple parts with trailing options", () => {
   const empty: Assembly = Assembly.from({ name: "empty" });
   expect(empty).toEqual({

@@ -18,6 +18,10 @@ export interface AssemblyOptions {
 }
 
 export const Assembly = {
+  /** Creates an empty standalone assembly from options only. */
+  new(options: AssemblyOptions): AssemblyData {
+    return Assembly.from(options);
+  },
   /** Creates an independent assembly without adding it to a model. */
   from(...args: [...parts: Part[], options: AssemblyOptions]): AssemblyData {
     const options = args[args.length - 1] as AssemblyOptions;

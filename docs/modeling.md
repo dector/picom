@@ -11,7 +11,7 @@ const steel = Material.new({
 const model = Model.new("Stand", {
   materials: { steel },
 });
-const base = Assembly.from({ name: "base", category: "structure" });
+const base = Assembly.new({ name: "base", category: "structure" });
 model.addAssembly(base);
 b(base, "plinth", [0, 0, 0.1], [1, 1, 0.2], "steel", "solid");
 part(base, "column", cylinder([0, 0, 0.7], 0.08, 1), "steel", "solid");
@@ -39,7 +39,7 @@ const body = Assembly.from(...parts, {
 model.addAssembly(body);
 ```
 
-Zero parts is valid: `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`. `model.addAssembly(assembly)` registers and returns the assembly, rejecting duplicate paths (`category/name`). It retains the supplied assembly reference. `describe` also checks uniqueness. The `assembly(model, id, category?, tags?, explode?)` helper is deprecated but remains available for compatibility. Use `Assembly.from({ name: id, category, tags, explode })` followed by `model.addAssembly(...)` instead.
+`Assembly.new({ name: "empty" })` creates an empty assembly, accepting only an options object (no parts). It uses the same defaults, validation, and copying as `Assembly.from`. Zero parts is also valid with `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`. `model.addAssembly(assembly)` registers and returns the assembly, rejecting duplicate paths (`category/name`). It retains the supplied assembly reference. `describe` also checks uniqueness. The `assembly(model, id, category?, tags?, explode?)` helper is deprecated but remains available for compatibility. Use `Assembly.new({ name: id, category, tags, explode })` followed by `model.addAssembly(...)` instead.
 
 ## Geometry conventions and limits
 

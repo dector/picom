@@ -28,7 +28,7 @@ const steel = Material.new({
   color: "#b2b5ae", roughness: 0.56, metalness: 0.6,
 });
 const model = Model.new("Stand", { materials: { steel } });
-const base = Assembly.from({ name: "base", category: "structure" });
+const base = Assembly.new({ name: "base", category: "structure" });
 model.addAssembly(base);
 
 b(base, "plinth", [0, 0, 0.1], [1, 1, 0.2], "steel", "solid");
@@ -38,7 +38,7 @@ const description = describe(model, { ground: true, scale: 1 });
 console.log(JSON.stringify(description));
 ```
 
-`Assembly.from(...)` creates a standalone assembly; `model.addAssembly(...)` registers it. The old `assembly(model, ...)` helper is deprecated but remains available for compatibility.
+`Assembly.new(options)` creates an empty standalone assembly. `Assembly.from(...parts, options)` creates one from parts. `model.addAssembly(...)` registers it. The old `assembly(model, ...)` helper is deprecated but remains available for compatibility.
 
 These are lightweight modeling helpers, not a CAD/CSG kernel. See the [geometry conventions and limits](docs/modeling.md#geometry-conventions-and-limits) before building more complex shapes.
 
