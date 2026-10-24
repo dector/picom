@@ -9,6 +9,21 @@ import type {
 import { box, slab, rod } from "./geometry.ts";
 
 export type Assembly = AssemblyData;
+
+export interface PartOptions {
+  /** Palette name. Defaults to "default". */
+  material?: string;
+  /** Visibility path segment. Defaults to "default" and overrides tags.component. */
+  component?: string;
+  /** Copied into the part; subsequent changes to these tags do not affect it. */
+  tags?: Tags;
+}
+
+export interface AssemblyBuilder extends AssemblyData {
+  /** Adds and returns a part, retaining the supplied geometry reference. */
+  part(name: string, geometry: Geometry, options?: PartOptions): Part;
+}
+
 export interface AssemblyOptions {
   name: string;
   category?: string;
@@ -19,16 +34,16 @@ export interface AssemblyOptions {
 
 export const Assembly = {
   /** Creates an empty standalone assembly from options only. */
-  new(options: AssemblyOptions): AssemblyData {
+  new(options: AssemblyOptions): AssemblyBuilder {
     return Assembly.from(options);
   },
   /** Creates an independent assembly without adding it to a model. */
-  from(...args: [...parts: Part[], options: AssemblyOptions]): AssemblyData {
+  from(...args: [...parts: Part[], options: AssemblyOptions]): AssemblyBuilder {
     const options = args[args.length - 1] as AssemblyOptions;
     const { name, category = "default", tags = {}, explode = [0, 0, 0], label } = options;
     pathSegment(name);
     pathSegment(category);
-    return {
+    const assembly: AssemblyData = {
       name,
       category,
       tags: { ...tags },
@@ -36,6 +51,13 @@ export const Assembly = {
       parts: structuredClone(args.slice(0, -1) as Part[]),
       ...(label !== undefined ? { label } : {}),
     };
+    // Builder methods are not part of the serializable assembly data.
+    Object.defineProperty(assembly, "part", {
+      value(name: string, geometry: Geometry, options: PartOptions = {}): Part {
+        return addPart(assembly, name, geometry, options);
+      },
+    });
+    return assembly as AssemblyBuilder;
   },
 };
 
@@ -63,6 +85,19 @@ export function assembly(
   model.assemblies.push(a);
   return a;
 }
+function addPart(
+  a: Assembly,
+  name: string,
+  geometry: Geometry,
+  { material = "default", component = "default", tags = {} }: PartOptions = {},
+): Part {
+  pathSegment(component);
+  const p = { name, geometry, material, tags: { ...tags, component } };
+  a.parts.push(p);
+  return p;
+}
+
+/** @deprecated Use assembly.part(name, geometry, options) instead. */
 export function part(
   a: Assembly,
   name: string,
@@ -71,11 +106,9 @@ export function part(
   component = "default",
   extra: Tags = {},
 ): Part {
-  pathSegment(component);
-  const p = { name, geometry, material, tags: { ...extra, component } };
-  a.parts.push(p);
-  return p;
+  return addPart(a, name, geometry, { material, component, tags: extra });
 }
+/** @deprecated Use assembly.part(name, g.box(...), options) instead. */
 export const b = (
   a: Assembly,
   name: string,
@@ -85,6 +118,7 @@ export const b = (
   component = "default",
   bevel = 0.018,
 ): Part => part(a, name, box(center, size, bevel), material, component);
+/** @deprecated Use assembly.part(name, g.rod(...), options) instead. */
 export const r = (
   a: Assembly,
   name: string,
@@ -94,6 +128,7 @@ export const r = (
   material = "default",
   component = "default",
 ): Part => part(a, name, rod(start, end, width), material, component);
+/** @deprecated Use assembly.part(name, g.slab(...), options) instead. */
 export const pane = (
   a: Assembly,
   name: string,

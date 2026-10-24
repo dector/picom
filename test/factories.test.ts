@@ -61,7 +61,7 @@ test("Assembly.new creates empty assemblies with independent options", () => {
     explode: [0, 0, 1], label: "Robot body",
   };
   const result = Assembly.new(options);
-  expect(result).toEqual({ ...options, parts: [] });
+  expect<Assembly>(result).toEqual({ ...options, parts: [] });
   result.tags.kind = "changed";
   result.explode[2] = 999;
   result.parts.push(b(empty, "part", [0, 0, 0], [1, 1, 1]));
@@ -92,7 +92,7 @@ test("Assembly.from accepts zero or multiple parts with trailing options", () =>
     explode: [0, 0, 1], label: "Robot body",
   };
   const result = Assembly.from(left, right, options);
-  expect(result).toEqual({ ...options, parts: [left, right] });
+  expect<Assembly>(result).toEqual({ ...options, parts: [left, right] });
   expect(Assembly.from(...source.parts, options)).toEqual(result);
   result.parts[0].geometry.vertices[0][0] = 999;
   result.parts[0].tags.component = "changed";

@@ -22,23 +22,32 @@ For the optional adapter, also install `three` (`^0.180.0`) in your application.
 Models use **Z-up coordinates and meters**. Compose geometry into assemblies, then call `describe` to get a JSON-serializable description with bounds and triangle counts.
 
 ```ts
-import { Material, Model, Assembly, b, part, cylinder, describe } from "@dector/picom";
+import { Material, Model, Assembly, g, describe } from "@dector/picom";
 
 const steel = Material.new({
   color: "#b2b5ae", roughness: 0.56, metalness: 0.6,
 });
 const model = Model.new("Stand", { materials: { steel } });
-const base = Assembly.new({ name: "base", category: "structure" });
-model.addAssembly(base);
+const base = model.addAssembly(Assembly.new({ name: "base", category: "structure" }));
 
-b(base, "plinth", [0, 0, 0.1], [1, 1, 0.2], "steel", "solid");
-part(base, "column", cylinder([0, 0, 0.7], 0.08, 1), "steel", "solid");
+base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.018), {
+  material: "steel",
+  component: "solid",
+});
+base.part("column", g.cylinder([0, 0, 0.7], 0.08, 1), {
+  material: "steel",
+  component: "solid",
+});
 
 const description = describe(model, { ground: true, scale: 1 });
 console.log(JSON.stringify(description));
 ```
 
-`Assembly.new(options)` creates an empty standalone assembly. `Assembly.from(...parts, options)` creates one from parts. `model.addAssembly(...)` registers it. The old `assembly(model, ...)` helper is deprecated but remains available for compatibility.
+`assembly.part(name, geometry, { material, component, tags })` adds a part and returns it. Material and component default to `"default"`; tags are copied, and `component` always overrides `tags.component`. Geometry is retained by reference.
+
+`Assembly.new(options)` creates an empty standalone assembly. `Assembly.from(...parts, options)` creates one from parts. `model.addAssembly(...)` registers and returns the same assembly, preserving its builder type. Builder methods are non-enumerable, so they are absent from JSON and clones; reconstruct with `Assembly.from(...parts, options)`.
+
+Geometry functions are exported directly, and the same functions are available as `geometry` and `g`; examples prefer `g`. The legacy `assembly`, `createModel`, `part`, `b`, `r`, and `pane` helpers remain available but are deprecated.
 
 These are lightweight modeling helpers, not a CAD/CSG kernel. See the [geometry conventions and limits](docs/modeling.md#geometry-conventions-and-limits) before building more complex shapes.
 

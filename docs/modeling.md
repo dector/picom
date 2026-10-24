@@ -3,7 +3,7 @@
 ## Build a model
 
 ```ts
-import { Material, Model, Assembly, b, part, cylinder, describe } from "@dector/picom";
+import { Material, Model, Assembly, g, describe } from "@dector/picom";
 
 const steel = Material.new({
   color: "#b2b5ae", roughness: 0.56, metalness: 0.6,
@@ -11,10 +11,18 @@ const steel = Material.new({
 const model = Model.new("Stand", {
   materials: { steel },
 });
-const base = Assembly.new({ name: "base", category: "structure" });
-model.addAssembly(base);
-b(base, "plinth", [0, 0, 0.1], [1, 1, 0.2], "steel", "solid");
-part(base, "column", cylinder([0, 0, 0.7], 0.08, 1), "steel", "solid");
+const base = model.addAssembly(Assembly.new({
+  name: "base",
+  category: "structure",
+}));
+base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.018), {
+  material: "steel",
+  component: "solid",
+});
+base.part("column", g.cylinder([0, 0, 0.7], 0.08, 1), {
+  material: "steel",
+  component: "solid",
+});
 
 const description = describe(model, { ground: true, scale: 1 });
 console.log(description.bounds, description.triangleCount);
@@ -22,6 +30,8 @@ console.log(JSON.stringify(description));
 ```
 
 Within this checkout, examples import `../src/index.js`; `.js` specifiers resolve to `.ts` through Bun/TypeScript. Installed consumers use `@dector/picom` (or `jsr:@dector/picom` directly in Deno).
+
+Geometry functions are exported directly and as `geometry` and `g`; examples use `g` (`g.box`, `g.rod`, `g.cylinder`, `g.revolve`, and so on).
 
 ## Assemblies
 
@@ -39,7 +49,67 @@ const body = Assembly.from(...parts, {
 model.addAssembly(body);
 ```
 
-`Assembly.new({ name: "empty" })` creates an empty assembly, accepting only an options object (no parts). It uses the same defaults, validation, and copying as `Assembly.from`. Zero parts is also valid with `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`. `model.addAssembly(assembly)` registers and returns the assembly, rejecting duplicate paths (`category/name`). It retains the supplied assembly reference. `describe` also checks uniqueness. The `assembly(model, id, category?, tags?, explode?)` helper is deprecated but remains available for compatibility. Use `Assembly.new({ name: id, category, tags, explode })` followed by `model.addAssembly(...)` instead.
+`Assembly.new({ name: "empty" })` creates an empty assembly, accepting only an options object (no parts). It uses the same defaults, validation, and copying as `Assembly.from`. Zero parts is also valid with `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`.
+
+`model.addAssembly(assembly)` registers and returns the same assembly, rejecting duplicate paths (`category/name`). Because it preserves the builder type, chaining works: `model.addAssembly(Assembly.new({ name: "base" })).part(...)`. `describe` also checks uniqueness.
+
+## Parts
+
+`assembly.part(name, geometry, options?)` appends a part and returns it. Options are:
+
+- `material` — palette key, default `"default"`.
+- `component` — visibility component, default `"default"`.
+- `tags` — additional string tags, default `{}`.
+
+```ts
+const base = model.addAssembly(Assembly.new({ name: "base" }));
+base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2]), {
+  material: "steel",
+  component: "solid",
+  tags: { kind: "support" },
+});
+```
+
+Tags are copied into a new object. `component` is always written to `tags.component` and overrides any `tags.component` value supplied through `tags`. The default component also overrides it, so pass `component` directly rather than only adding it to `tags`:
+
+```ts
+base.part("column", g.cylinder([0, 0, 0.7], 0.08, 1), {
+  component: "shaft",
+  tags: { component: "ignored", kind: "support" },
+});
+// tags => { component: "shaft", kind: "support" }
+```
+
+The supplied geometry is retained by reference; it is not cloned. Reusing or intentionally mutating geometry therefore affects the stored part. `describe` works on a deep copy, so it does not modify the part or its geometry.
+
+Builder methods are non-enumerable. They do not appear in `JSON.stringify` or `structuredClone`, and spreading an assembly copies only plain data. Reconstruct a builder with `Assembly.from`:
+
+```ts
+const plain = structuredClone(base);
+const revived = Assembly.from(...plain.parts, {
+  name: plain.name,
+  category: plain.category,
+  tags: plain.tags,
+  explode: plain.explode,
+  label: plain.label,
+});
+revived.part("cap", g.cylinder([0, 0, 1.4], 0.1, 0.05));
+```
+
+### Deprecated helpers
+
+The legacy `assembly`, `part`, `b`, `r`, `pane`, and `createModel` helpers remain available for compatibility but are deprecated. Use the builders above instead.
+
+| Legacy | Replacement |
+| --- | --- |
+| `createModel(name, materials)` | `Model.new(name, { materials })` |
+| `assembly(model, id, category, tags, explode)` | `model.addAssembly(Assembly.new({ name: id, category, tags, explode }))` |
+| `part(a, name, geometry, material, component, extra)` | `a.part(name, geometry, { material, component, tags: extra })` |
+| `b(a, name, center, size, material, component, bevel)` | `a.part(name, g.box(center, size, bevel), { material, component })` |
+| `r(a, name, start, end, width, material, component)` | `a.part(name, g.rod(start, end, width), { material, component })` |
+| `pane(a, name, points, normal, material, component, depth)` | `a.part(name, g.slab(points, normal, depth), { material, component })` |
+
+Legacy defaults can differ from the `g` defaults. To preserve exact old geometry, pass the legacy default explicitly: `b` used a `0.018` bevel (`g.box` defaults to `0.02`), and `pane` used a `0.012` depth (`g.slab` defaults to `0.015`). `r` used a `0.05` width, matching `g.rod`.
 
 ## Geometry conventions and limits
 

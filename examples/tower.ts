@@ -1,21 +1,42 @@
-import { createModel, assembly, b, r, part, cylinder, describe } from "../src/index.js";
+import { Model, Assembly, g, describe } from "../src/index.js";
 
-const model = createModel("Watchtower", {
-  stone: { color: "#b0aaa0", roughness: 0.95, metalness: 0 },
-  wood: { color: "#906747", roughness: 0.85, metalness: 0 },
+const model = Model.new("Watchtower", {
+  materials: {
+    stone: { color: "#b0aaa0", roughness: 0.95, metalness: 0 },
+    wood: { color: "#906747", roughness: 0.85, metalness: 0 },
+  },
 });
-const tower = assembly(model, "tower", "structure");
-part(tower, "base", cylinder([0, 0, 0.12], 0.85, 0.24), "stone", "base");
-b(tower, "platform", [0, 0, 1.8], [1.3, 1.3, 0.14], "wood", "platform");
+const tower = model.addAssembly(
+  Assembly.new({ name: "tower", category: "structure" }),
+);
+tower.part("base", g.cylinder([0, 0, 0.12], 0.85, 0.24), {
+  material: "stone",
+  component: "base",
+});
+tower.part("platform", g.box([0, 0, 1.8], [1.3, 1.3, 0.14], 0.018), {
+  material: "wood",
+  component: "platform",
+});
 
 for (const x of [-0.5, 0.5]) {
   for (const y of [-0.5, 0.5]) {
-    r(tower, `post-${x}-${y}`, [x, y, 0.24], [x, y, 2.4], 0.1, "wood", "posts");
+    tower.part(`post-${x}-${y}`, g.rod([x, y, 0.24], [x, y, 2.4], 0.1), {
+      material: "wood",
+      component: "posts",
+    });
   }
 }
 for (const side of [-0.5, 0.5]) {
-  r(tower, `rail-x-${side}`, [-0.5, side, 2.35], [0.5, side, 2.35], 0.06, "wood", "rails");
-  r(tower, `rail-y-${side}`, [side, -0.5, 2.35], [side, 0.5, 2.35], 0.06, "wood", "rails");
+  tower.part(
+    `rail-x-${side}`,
+    g.rod([-0.5, side, 2.35], [0.5, side, 2.35], 0.06),
+    { material: "wood", component: "rails" },
+  );
+  tower.part(
+    `rail-y-${side}`,
+    g.rod([side, -0.5, 2.35], [side, 0.5, 2.35], 0.06),
+    { material: "wood", component: "rails" },
+  );
 }
 
 const description = describe(model, { ground: true });

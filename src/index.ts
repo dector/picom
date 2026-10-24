@@ -1,5 +1,7 @@
 export type * from "./types.ts";
 export * from "./geometry.ts";
+export * as geometry from "./geometry.ts";
+export * as g from "./geometry.ts";
 export * from "./parts.ts";
 export { Assembly } from "./parts.ts";
 export * from "./bounds.ts";

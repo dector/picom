@@ -38,7 +38,7 @@ A responsive JavaScript editor with live Three.js preview, touch orbit/zoom, exa
 | Module | Functionality |
 | --- | --- |
 | `src/geometry.ts` | Vector math, polygon triangulation, indexed meshes, outward-oriented convex meshes, beveled boxes, slabs/extrusions, cylinders, rods, lofts, transforms, bands and revolved profiles |
-| `src/parts.ts` | Assembly/part builders; `b`, `r` and `pane` convenience builders; arbitrary string tags and explosion offsets |
+| `src/parts.ts` | Assembly builders with `.part(...)`; deprecated `part`, `b`, `r` and `pane` helpers; arbitrary string tags and explosion offsets |
 | `src/model.ts` | Draft creation, nonmutating translation, finalization, optional grounding/scaling, bounds, triangle counts and visibility hierarchy |
 | `src/materials.ts` | 17 neutral PBR presets; generic palette recoloring retaining finish/emission differences |
 | `src/bounds.ts` | Bounds, centers and triangle counting; empty models have finite zero bounds |
