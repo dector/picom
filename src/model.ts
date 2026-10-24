@@ -1,7 +1,7 @@
 import type { Assembly, ModelDraft, Description, Materials, Vector } from "./types.ts";
 import { boundsOf, triangleCount } from "./bounds.ts";
 import { visibilityTree } from "./visibility.ts";
-import { pathSegment } from "./parts.ts";
+import { pathSegment, componentSegments } from "./parts.ts";
 import { Material } from "./materials.ts";
 
 export interface ModelOptions {
@@ -62,7 +62,7 @@ export function describe(
     if (a.explode.length !== 3 || !a.explode.every(Number.isFinite))
       throw RangeError("Explode vector needs three finite coordinates");
     for (const p of a.parts) {
-      pathSegment(p.tags.component ?? "default");
+      componentSegments(p.tags.component ?? "default");
       if (!Object.hasOwn(result.materials, p.material))
         throw RangeError(`Unknown material: ${p.material}`);
       const g = p.geometry;

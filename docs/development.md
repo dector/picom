@@ -23,7 +23,7 @@ bun examples/tower.ts
 bun examples/vase.ts
 ```
 
-These five examples also appear in the playground picker, using the same source files. They cover boxes, loops, assemblies/explosion offsets, rods/cylinders, and revolved profiles. The vase has an open bottom.
+These five examples also appear in the playground picker, using the same source files. They cover boxes with nested visibility groups, loops, assemblies/explosion offsets, rods/cylinders, and revolved profiles. The vase has an open bottom.
 
 ## Browser playground
 
@@ -38,11 +38,11 @@ A responsive JavaScript editor with live Three.js preview, touch orbit/zoom, exa
 | Module | Functionality |
 | --- | --- |
 | `src/geometry.ts` | Vector math, polygon triangulation, indexed meshes, outward-oriented convex meshes, beveled boxes, slabs/extrusions, cylinders, rods, lofts, transforms, bands and revolved profiles |
-| `src/parts.ts` | Assembly builders with `.part(...)`; deprecated `part`, `b`, `r` and `pane` helpers; arbitrary string tags and explosion offsets |
-| `src/model.ts` | Draft creation, nonmutating translation, finalization, optional grounding/scaling, bounds, triangle counts and visibility hierarchy |
+| `src/parts.ts` | Assembly builders with `.part(...)` and nested `.group(...)` visibility handles; deprecated `part`, `b`, `r` and `pane` helpers; arbitrary string tags and explosion offsets |
+| `src/model.ts` | Draft creation, nonmutating translation, finalization, optional grounding/scaling, bounds, triangle counts and derived nested visibility hierarchy |
 | `src/materials.ts` | 17 neutral PBR presets; generic palette recoloring retaining finish/emission differences |
 | `src/bounds.ts` | Bounds, centers and triangle counting; empty models have finite zero bounds |
-| `src/visibility.ts` | Category → assembly → component hierarchy; ancestor gates, tri-state status, toggling and inversion |
+| `src/visibility.ts` | Category → assembly → nested group hierarchy; shared paths, mixed-node parts (`hasParts`), ancestor gates, tri-state status, toggling and inversion |
 | `src/dimensions.ts` | Visible assembled dimensions and meter formatting |
 | `src/three-adapter.ts` | Optional Three.js objects, flat shading, per-mesh materials, shadows, visibility/explosion updates and resource disposal |
 

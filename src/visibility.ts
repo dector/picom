@@ -1,5 +1,6 @@
 import type { Assembly, Part, Visibility, VisibilityNode } from "./types.ts";
-// Serializable category → assembly → component tree; caller-owned labels and categories.
+import { componentSegments } from "./parts.ts";
+// Serializable category → assembly → nested group tree; caller-owned labels and categories.
 export const title = (value: string): string =>
   value.replaceAll("_", " ").replace(/^\w/, (c) => c.toUpperCase());
 export const componentOf = (part: Part): string =>
@@ -15,15 +16,34 @@ export function visibilityTree(
   ],
   labels: Readonly<Record<string, string>> = {},
 ): VisibilityNode[] {
-  const entry = (a: Assembly): VisibilityNode => ({
-    id: assemblyPath(a),
-    label: a.label ?? labels[assemblyPath(a)] ?? title(a.name),
-    children: [...new Set(a.parts.map(componentOf))].map((component) => ({
-      id: `${assemblyPath(a)}/${component}`,
-      label: labels[`${assemblyPath(a)}/${component}`] ?? title(component),
+  const entry = (a: Assembly): VisibilityNode => {
+    const root: VisibilityNode = {
+      id: assemblyPath(a),
+      label: a.label ?? labels[assemblyPath(a)] ?? title(a.name),
       children: [],
-    })),
-  });
+    };
+    const nodes = new Map<string, VisibilityNode>();
+    const direct = new Set<VisibilityNode>();
+    for (const part of a.parts) {
+      let parent = root;
+      for (const segment of componentSegments(componentOf(part))) {
+        const id = `${parent.id}/${segment}`;
+        let node = nodes.get(id);
+        if (!node) {
+          node = { id, label: labels[id] ?? title(segment), children: [] };
+          nodes.set(id, node);
+          parent.children.push(node);
+        }
+        parent = node;
+      }
+      direct.add(parent);
+    }
+    // Leaf nodes already represent parts. Mixed groups need an explicit marker
+    // so their own parts count toward tri-state status alongside child groups.
+    for (const node of direct)
+      if (node.children.length) node.hasParts = true;
+    return root;
+  };
   const allCategories = [
     ...new Set([...categories, ...assemblies.map((a) => a.category)]),
   ];
@@ -49,6 +69,8 @@ export function visibilityStatus(
   const children = node.children.map((child) =>
     visibilityStatus(visibility, child),
   );
+  if (node.hasParts)
+    children.push({ checked: isVisible(visibility, node.id), indeterminate: false });
   const checked = children.every((child) => child.checked);
   return {
     checked,
@@ -57,20 +79,24 @@ export function visibilityStatus(
       children.some((child) => child.checked || child.indeterminate),
   };
 }
+// Snapshot groups containing parts, applying parents before descendants.
+// Descendants take priority when releasing an ancestor gate: direct parent
+// parts cannot be hidden independently while any descendant is visible.
 export function invertVisibility(
   visibility: Visibility,
   tree: VisibilityNode[],
 ): void {
-  const leaves: [VisibilityNode, boolean][] = [];
+  const targets: [VisibilityNode, boolean][] = [];
   function collect(nodes: VisibilityNode[]) {
     for (const node of nodes) {
-      if (node.children.length) collect(node.children);
-      else leaves.push([node, !isVisible(visibility, node.id)]);
+      if (node.hasParts || !node.children.length)
+        targets.push([node, !isVisible(visibility, node.id)]);
+      collect(node.children);
     }
   }
   // Snapshot effective visibility before enabling any hidden ancestor gates.
   collect(tree);
-  for (const [node, checked] of leaves)
+  for (const [node, checked] of targets)
     setVisibility(visibility, node, checked);
 }
 export function setVisibility(

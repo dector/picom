@@ -37,6 +37,8 @@ export interface VisibilityNode {
   id: string;
   label: string;
   children: VisibilityNode[];
+  /** Internal group also contains parts directly, not only in its children. */
+  hasParts?: true;
 }
 export type Visibility = Record<string, boolean>;
 export interface ModelDraft {

@@ -1,6 +1,6 @@
 import { test, expect, spyOn } from "bun:test";
 import * as THREE from "three";
-import { createModel, assembly, b, describe } from "../src/index.js";
+import { Assembly, Model, createModel, assembly, b, describe, g } from "../src/index.js";
 import {
   createObject,
   applyState,
@@ -34,6 +34,37 @@ test("constructs final meshes without a renderer or DOM", () => {
     expect(root.children[0].position.toArray()).toEqual([2, 4, 6]);
     expect(visibleTriangles(root)).toBe(12);
     applyState(root, { visibility: { objects: false }, explode: 0 });
+    expect(visibleTriangles(root)).toBe(0);
+  } finally {
+    disposeObject(root);
+  }
+});
+test("applies nested component visibility paths", () => {
+  const model = Model.new();
+  const base = model.addAssembly(
+    Assembly.new({ name: "robot", category: "bot" }),
+  );
+  const legs = base.group("legs");
+  legs.part("hip", g.box([0, 0, 0], [1, 1, 1], 0));
+  legs.group("front").part("shin", g.box([0, 0, 2], [1, 1, 1], 0));
+  const root = createObject(describe(model));
+  try {
+    const assembly = root.children[0] as THREE.Group;
+    expect(
+      assembly.children.map((mesh) => mesh.userData.visibilityPath),
+    ).toEqual(["bot/robot/legs", "bot/robot/legs/front"]);
+    expect(visibleTriangles(root)).toBe(24);
+
+    applyState(root, {
+      visibility: { "bot/robot/legs/front": false },
+      explode: 0,
+    });
+    expect(visibleTriangles(root)).toBe(12);
+
+    applyState(root, {
+      visibility: { "bot/robot/legs": false },
+      explode: 0,
+    });
     expect(visibleTriangles(root)).toBe(0);
   } finally {
     disposeObject(root);

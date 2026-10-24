@@ -15,13 +15,12 @@ const base = model.addAssembly(Assembly.new({
   name: "base",
   category: "structure",
 }));
-base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.018), {
+const frame = base.group("frame");
+frame.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.018), {
   material: "steel",
-  component: "solid",
 });
-base.part("column", g.cylinder([0, 0, 0.7], 0.08, 1), {
+frame.part("column", g.cylinder([0, 0, 0.7], 0.08, 1), {
   material: "steel",
-  component: "solid",
 });
 
 const description = describe(model, { ground: true, scale: 1 });
@@ -58,29 +57,53 @@ model.addAssembly(body);
 `assembly.part(name, geometry, options?)` appends a part and returns it. Options are:
 
 - `material` — palette key, default `"default"`.
-- `component` — visibility component, default `"default"`.
 - `tags` — additional string tags, default `{}`.
+- `component` — explicit visibility path for compatibility; prefer groups.
 
 ```ts
 const base = model.addAssembly(Assembly.new({ name: "base" }));
 base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2]), {
   material: "steel",
-  component: "solid",
   tags: { kind: "support" },
 });
 ```
 
-Tags are copied into a new object. `component` is always written to `tags.component` and overrides any `tags.component` value supplied through `tags`. The default component also overrides it, so pass `component` directly rather than only adding it to `tags`:
+Tags are copied into a new object. For compatibility, `component` is still accepted and may be a slash-separated path with nonempty segments. It is always written to `tags.component` and overrides any `tags.component` supplied through `tags`; omitting it writes `"default"`. Prefer groups for new code:
 
 ```ts
-base.part("column", g.cylinder([0, 0, 0.7], 0.08, 1), {
-  component: "shaft",
+base.part("toe", g.box([0, 0, 0], [0.1, 0.2, 0.1]), {
+  component: "legs/front/toes",
   tags: { component: "ignored", kind: "support" },
 });
-// tags => { component: "shaft", kind: "support" }
+// tags => { component: "legs/front/toes", kind: "support" }
 ```
 
 The supplied geometry is retained by reference; it is not cloned. Reusing or intentionally mutating geometry therefore affects the stored part. `describe` works on a deep copy, so it does not modify the part or its geometry.
+
+## Groups
+
+`assembly.group(name)` creates a lightweight handle for a visibility group. `group.part(name, geometry, options?)` still adds to the original `assembly.parts`; its `tags.component` becomes the group path. Nested `group.group(name)` calls join names with `/`.
+
+```ts
+const table = model.addAssembly(Assembly.new({ name: "table" }));
+table.group("top").part("top", g.box([0, 0, 0.75], [1.4, 0.8, 0.08]), {
+  material: "wood",
+});
+
+const legs = table.group("legs");
+for (const x of [-0.6, 0.6]) {
+  for (const y of [-0.3, 0.3]) {
+    legs.group(y < 0 ? "front" : "rear").part(
+      `leg-${x}-${y}`,
+      g.box([x, y, 0.355], [0.07, 0.07, 0.71]),
+      { material: "steel" },
+    );
+  }
+}
+// tags.component: "top", "legs/front", "legs/rear"
+```
+
+Group names are single nonempty segments without `/`. Group part options accept only `material` and `tags`; a `tags.component` value is always replaced by the group path. Groups have no separate defaults, geometry, transforms, or explosion offsets. Handles are not stored: repeated `group` calls with the same names address the same logical visibility group. Empty groups disappear because the visibility tree is derived from parts. Like `.part`, `.group` is non-enumerable; serialized assemblies still contain only flat parts with `component` paths.
 
 Builder methods are non-enumerable. They do not appear in `JSON.stringify` or `structuredClone`, and spreading an assembly copies only plain data. Reconstruct a builder with `Assembly.from`:
 

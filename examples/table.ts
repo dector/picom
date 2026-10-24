@@ -9,18 +9,19 @@ const model = Model.new("Table", {
 const table = model.addAssembly(
   Assembly.new({ name: "table", category: "furniture" }),
 );
-table.part("top", g.box([0, 0, 0.75], [1.4, 0.8, 0.08], 0.018), {
+table.group("top").part("top", g.box([0, 0, 0.75], [1.4, 0.8, 0.08], 0.018), {
   material: "wood",
-  component: "top",
 });
 
-// Reuse one shape at four positions.
+// Reuse one shape at four positions, grouped by end of the table.
+const legs = table.group("legs");
 for (const x of [-0.6, 0.6]) {
   for (const y of [-0.3, 0.3]) {
-    table.part(`leg-${x}-${y}`, g.box([x, y, 0.355], [0.07, 0.07, 0.71], 0.018), {
-      material: "steel",
-      component: "legs",
-    });
+    legs.group(y < 0 ? "front" : "rear").part(
+      `leg-${x}-${y}`,
+      g.box([x, y, 0.355], [0.07, 0.07, 0.71], 0.018),
+      { material: "steel" },
+    );
   }
 }
 

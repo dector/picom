@@ -13,15 +13,25 @@ export type Assembly = AssemblyData;
 export interface PartOptions {
   /** Palette name. Defaults to "default". */
   material?: string;
-  /** Visibility path segment. Defaults to "default" and overrides tags.component. */
+  /** Visibility path. Defaults to "default" and overrides tags.component. */
   component?: string;
   /** Copied into the part; subsequent changes to these tags do not affect it. */
   tags?: Tags;
 }
 
+export type GroupPartOptions = Omit<PartOptions, "component">;
+
+/** A lightweight visibility group; parts still belong to the original assembly. */
+export interface PartGroup {
+  group(name: string): PartGroup;
+  part(name: string, geometry: Geometry, options?: GroupPartOptions): Part;
+}
+
 export interface AssemblyBuilder extends AssemblyData {
   /** Adds and returns a part, retaining the supplied geometry reference. */
   part(name: string, geometry: Geometry, options?: PartOptions): Part;
+  /** Creates a visibility group handle. Empty groups are not serialized. */
+  group(name: string): PartGroup;
 }
 
 export interface AssemblyOptions {
@@ -52,9 +62,16 @@ export const Assembly = {
       ...(label !== undefined ? { label } : {}),
     };
     // Builder methods are not part of the serializable assembly data.
-    Object.defineProperty(assembly, "part", {
-      value(name: string, geometry: Geometry, options: PartOptions = {}): Part {
-        return addPart(assembly, name, geometry, options);
+    Object.defineProperties(assembly, {
+      part: {
+        value(name: string, geometry: Geometry, options: PartOptions = {}): Part {
+          return addPart(assembly, name, geometry, options);
+        },
+      },
+      group: {
+        value(name: string): PartGroup {
+          return partGroup(assembly, pathSegment(name));
+        },
       },
     });
     return assembly as AssemblyBuilder;
@@ -69,6 +86,22 @@ export function pathSegment(value: string): string {
     );
   return value;
 }
+/** Validates a component path, including each nonempty segment. */
+export function componentSegments(value: string): string[] {
+  return value.split("/").map(pathSegment);
+}
+
+function partGroup(assembly: Assembly, path: string): PartGroup {
+  return {
+    group(name: string): PartGroup {
+      return partGroup(assembly, `${path}/${pathSegment(name)}`);
+    },
+    part(name: string, geometry: Geometry, options: GroupPartOptions = {}): Part {
+      return addPart(assembly, name, geometry, { ...options, component: path });
+    },
+  };
+}
+
 /** @deprecated Use Assembly.from(options) and model.addAssembly(assembly) instead. */
 export function assembly(
   model: ModelDraft,
@@ -91,7 +124,7 @@ function addPart(
   geometry: Geometry,
   { material = "default", component = "default", tags = {} }: PartOptions = {},
 ): Part {
-  pathSegment(component);
+  componentSegments(component);
   const p = { name, geometry, material, tags: { ...tags, component } };
   a.parts.push(p);
   return p;

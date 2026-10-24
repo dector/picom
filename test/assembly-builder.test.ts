@@ -42,7 +42,7 @@ test("part options copy tags and explicit component takes precedence", () => {
 test("invalid components are rejected before adding parts", () => {
   const base = Assembly.new({ name: "base" });
   const mesh = g.box([0, 0, 0], [1, 1, 1]);
-  for (const component of ["", "bad/path"]) {
+  for (const component of ["", "/bad", "bad/", "bad//path"]) {
     expect(() => base.part("bad", mesh, { component })).toThrow();
   }
   expect(base.parts).toEqual([]);
