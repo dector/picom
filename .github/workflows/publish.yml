@@ -1,0 +1,61 @@
+name: Publish to JSR
+run-name: Publish ${{ inputs.tag }} to JSR
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to publish (e.g. v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-jsr
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out the selected tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.2"
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Derive version from tag
+        id: release
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          version=$(bun scripts/release-version.ts "$RELEASE_TAG")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Publishing @dector/picom@$version from $RELEASE_TAG" >> "$GITHUB_STEP_SUMMARY"
+
+      - run: bun install --frozen-lockfile
+      - run: bun test
+      - run: bun run typecheck
+
+      - name: Verify JSR package
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: deno publish --dry-run --set-version "$VERSION" --no-lock --node-modules-dir=none
+
+      - name: Publish to JSR
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: deno publish --set-version "$VERSION" --no-lock --node-modules-dir=none

@@ -1,0 +1,15 @@
+{
+  "name": "@dector/picom",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./three": "./src/three-adapter.ts"
+  },
+  "imports": {
+    "three": "npm:three@^0.180.0"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "README.md", "LICENSE", "deno.json"]
+  }
+}

@@ -4,9 +4,24 @@ A small TypeScript toolkit for procedural low-poly models. Geometry and model de
 
 Extracted from `wonderer/generator/model`, without changing the source project. Vehicle builders, settings, registries, identifiers, UI and browser tooling are not included.
 
-## Run
+## Install
 
-Requires Bun and a TypeScript-aware runtime/bundler (the package currently exports source TypeScript, not compiled JavaScript).
+Available on JSR as [`@dector/picom`](https://jsr.io/@dector/picom) after the first release.
+
+```sh
+# Bun
+bunx jsr add @dector/picom
+# npm
+npx jsr add @dector/picom
+# Deno
+deno add jsr:@dector/picom
+```
+
+For the optional adapter, also install `three` (`^0.180.0`) in your application.
+
+## Run locally
+
+Requires Bun. This checkout exports source TypeScript, not compiled JavaScript.
 
 ```sh
 bun install
@@ -26,7 +41,7 @@ A responsive JavaScript editor with live Three.js preview, touch orbit/zoom, exa
 ## Build a model
 
 ```ts
-import { createModel, assembly, b, part, cylinder, describe } from "picom";
+import { createModel, assembly, b, part, cylinder, describe } from "@dector/picom";
 
 const model = createModel("Stand", {
   steel: { color: "#b2b5ae", roughness: 0.56, metalness: 0.6 },
@@ -40,7 +55,7 @@ console.log(description.bounds, description.triangleCount);
 console.log(JSON.stringify(description));
 ```
 
-Within this checkout, examples import `../src/index.js`; `.js` specifiers resolve to `.ts` through Bun/TypeScript. External consumers can use the `picom` package export via a local link/workspace dependency.
+Within this checkout, examples import `../src/index.js`; `.js` specifiers resolve to `.ts` through Bun/TypeScript. Installed consumers use `@dector/picom` (or `jsr:@dector/picom` directly in Deno).
 
 ## What's retained
 
@@ -79,7 +94,7 @@ Assembly IDs and categories must be nonempty path segments without `/`. Componen
 Missing visibility entries are visible. A `false` ancestor hides its descendants. `setVisibility` updates a node and descendants; enabling a child also releases ancestor gates. `invertVisibility` inverts effective leaf states, including when a category is hidden. Category ordering and labels are caller-provided; no domain registry is hardcoded.
 
 ```ts
-import { setVisibility, visibleDimensions } from "picom";
+import { setVisibility, visibleDimensions } from "@dector/picom";
 
 const visibility = {};
 setVisibility(visibility, description.visibilityTree[0], false);
@@ -91,7 +106,7 @@ Dimensions describe assembled geometry, not exploded inspection positions.
 ### Optional Three.js adapter
 
 ```ts
-import { createObject, applyState, disposeObject } from "picom/three";
+import { createObject, applyState, disposeObject } from "@dector/picom/three";
 
 const object = createObject(description);
 // The core is Z-up; configure your scene/camera accordingly.
@@ -102,8 +117,32 @@ scene.remove(object);
 disposeObject(object);
 ```
 
-Only `picom/three` imports Three.js. Install `three` in applications using this adapter; the dev installation includes it for tests. The adapter owns the geometry and per-mesh materials it creates, cleans up on construction errors, and does not own your scene, renderer or externally supplied textures. `applyState` expects a root created by `createObject`.
+Only `@dector/picom/three` imports Three.js. Install `three` in applications using this adapter; the dev installation includes it for tests. The adapter owns the geometry and per-mesh materials it creates, cleans up on construction errors, and does not own your scene, renderer or externally supplied textures. `applyState` expects a root created by `createObject`.
 
 ## Source extraction notes
 
-Retained algorithms and material values come from `wonderer/generator/model/{geometry,parts,materials,colors,bounds,visibility,dimensions,three-adapter}.ts`; generic finalization was adapted from `wrg.ts`. The solid assertion helper also comes from its test support. Domain palette membership, per-optic identities, style selectors, fixed category labels, vehicle-specific grounding, body selection and all feature builders were intentionally omitted. No source license has been inferred or added; package publication is disabled (`private: true`).
+Retained algorithms and material values come from `wonderer/generator/model/{geometry,parts,materials,colors,bounds,visibility,dimensions,three-adapter}.ts`; generic finalization was adapted from `wrg.ts`. The solid assertion helper also comes from its test support. Domain palette membership, per-optic identities, style selectors, fixed category labels, vehicle-specific grounding, body selection and all feature builders were intentionally omitted. Released under the [MIT license](LICENSE). `package.json` remains private to prevent accidental npm publication; JSR uses `deno.json`.
+
+## Publishing to JSR
+
+Publishing is **manual only**, through `.github/workflows/publish.yml`. Pushing a tag does not publish anything.
+
+### One-time setup
+
+1. Create `@dector/picom` on [JSR](https://jsr.io/new).
+2. In the package's JSR settings, link the GitHub repository `dector/picom`. GitHub Actions authenticates with OIDC; no `JSR_TOKEN` secret is needed.
+3. Push the workflow to the repository's default branch so **Run workflow** is available.
+
+### Release
+
+1. Create and push a tag separately, pointing at the code you want to publish. The tagged commit must include the publishing configuration and release script.
+2. Open **Actions → Publish to JSR → Run workflow**. Keep the workflow branch on the default branch and enter the exact tag in the `tag` field.
+3. The workflow checks out that tag, runs tests and typechecking, verifies the package, then publishes it.
+
+Supported tags: `v1.2.3` or `1.2.3`, optionally with a prerelease suffix such as `v1.2.3-rc.1`. Build metadata (`+...`) is not supported. The selected tag is the version source, not `package.json` or `deno.json`: `deno publish --set-version` overrides the configured version for that release without a version-bump commit. No automatic latest-tag lookup is performed.
+
+To check the package locally with Deno 2:
+
+```sh
+deno publish --dry-run --allow-dirty --no-lock --node-modules-dir=none
+```
