@@ -1,12 +1,39 @@
 import type {
   ModelDraft,
-  Assembly,
+  Assembly as AssemblyData,
   Geometry,
   Tags,
   Vector,
   Part,
 } from "./types.ts";
 import { box, slab, rod } from "./geometry.ts";
+
+export type Assembly = AssemblyData;
+export interface AssemblyOptions {
+  name: string;
+  category?: string;
+  tags?: Tags;
+  explode?: Vector;
+  label?: string;
+}
+
+export const Assembly = {
+  /** Creates an independent assembly without adding it to a model. */
+  from(...args: [...parts: Part[], options: AssemblyOptions]): AssemblyData {
+    const options = args[args.length - 1] as AssemblyOptions;
+    const { name, category = "default", tags = {}, explode = [0, 0, 0], label } = options;
+    pathSegment(name);
+    pathSegment(category);
+    return {
+      name,
+      category,
+      tags: { ...tags },
+      explode: [...explode],
+      parts: structuredClone(args.slice(0, -1) as Part[]),
+      ...(label !== undefined ? { label } : {}),
+    };
+  },
+};
 
 // IDs and categories are path segments, not paths; arbitrary semantic tags are retained.
 export function pathSegment(value: string): string {
@@ -27,13 +54,7 @@ export function assembly(
   pathSegment(category);
   if (model.assemblies.some((a) => a.category === category && a.name === id))
     throw RangeError(`Duplicate assembly: ${category}/${id}`);
-  const a: Assembly = {
-    name: id,
-    tags: { ...tags },
-    category,
-    explode: [...explode],
-    parts: [],
-  };
+  const a = Assembly.from({ name: id, category, tags, explode });
   model.assemblies.push(a);
   return a;
 }

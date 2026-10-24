@@ -1,4 +1,4 @@
-import type { ModelDraft, Description, Materials, Vector } from "./types.ts";
+import type { Assembly, ModelDraft, Description, Materials, Vector } from "./types.ts";
 import { boundsOf, triangleCount } from "./bounds.ts";
 import { visibilityTree } from "./visibility.ts";
 import { pathSegment } from "./parts.ts";
@@ -8,20 +8,35 @@ export interface ModelOptions {
   materials?: Materials;
 }
 
+export interface ModelBuilder extends ModelDraft {
+  addAssembly(assembly: Assembly): Assembly;
+}
+
 export const Model = {
-  new(name = "Model", options: ModelOptions = {}): ModelDraft {
-    return {
+  new(name = "Model", options: ModelOptions = {}): ModelBuilder {
+    const model: ModelDraft = {
       name,
       schemaVersion: 1,
       coordinates: { up: "+z", units: "meters" },
       materials: structuredClone(options.materials ?? { default: Material.new() }),
       assemblies: [],
     };
+    // Keep methods out of JSON and structuredClone's enumerable data.
+    Object.defineProperty(model, "addAssembly", {
+      value(assembly: Assembly): Assembly {
+        const id = `${pathSegment(assembly.category)}/${pathSegment(assembly.name)}`;
+        if (model.assemblies.some((a) => `${a.category}/${a.name}` === id))
+          throw RangeError(`Duplicate assembly: ${id}`);
+        model.assemblies.push(assembly);
+        return assembly;
+      },
+    });
+    return model as ModelBuilder;
   },
 };
 
 /** @deprecated Use Model.new(name, { materials }) instead. */
-export function createModel(name = "Model", materials?: Materials): ModelDraft {
+export function createModel(name = "Model", materials?: Materials): ModelBuilder {
   return Model.new(name, { materials });
 }
 export interface DescribeOptions {

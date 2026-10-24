@@ -22,6 +22,24 @@ console.log(JSON.stringify(description));
 
 Within this checkout, examples import `../src/index.js`; `.js` specifiers resolve to `.ts` through Bun/TypeScript. Installed consumers use `@dector/picom` (or `jsr:@dector/picom` directly in Deno).
 
+## Assemblies
+
+`Assembly.from(...parts, options)` creates a standalone assembly with required trailing options. `name` is required; `category` defaults to `"default"`, `tags` to `{}`, and `explode` to `[0, 0, 0]`. An optional `label` controls its display name. Parts and options are copied, so changes to the assembly do not affect the inputs.
+
+```ts
+import { Assembly } from "@dector/picom";
+
+const body = Assembly.from(...parts, {
+  name: "body",
+  category: "robot",
+  explode: [0, 0, 0.5],
+  label: "Robot body",
+});
+model.addAssembly(body);
+```
+
+Zero parts is valid: `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`. `model.addAssembly(assembly)` registers and returns the assembly, rejecting duplicate paths (`category/name`). It retains the supplied assembly reference. `describe` also checks uniqueness. The existing `assembly(model, id, category?, tags?, explode?)` helper still creates and registers an empty assembly directly.
+
 ## Geometry conventions and limits
 
 - Defaults: **Z-up, meters**, outward triangle winding. Arrays contain three coordinates; triangle indices are zero-based. Normals are derived by the renderer, not stored in JSON.

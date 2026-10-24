@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { Material, Model, MATERIALS, createModel, assembly, b, describe } from "../src/index.js";
+import { Assembly, Material, Model, MATERIALS, createModel, assembly, b, describe } from "../src/index.js";
 import type { Material as MaterialData } from "../src/index.js";
 
 test("Material.new supplies defaults and returns independent plain values", () => {
@@ -49,6 +49,54 @@ test("named palettes work with existing builders and are cloned", () => {
   const result = describe(model, { ground: true });
   expect(result.triangleCount).toBeGreaterThan(0);
   expect(JSON.parse(JSON.stringify(result))).toEqual(result);
+});
+
+test("Assembly.from accepts zero or multiple parts with trailing options", () => {
+  const empty: Assembly = Assembly.from({ name: "empty" });
+  expect(empty).toEqual({
+    name: "empty", category: "default", tags: {}, explode: [0, 0, 0], parts: [],
+  });
+  const source = assembly(Model.new(), "source");
+  const left = b(source, "left", [0, 0, 0], [1, 1, 1]);
+  const right = b(source, "right", [2, 0, 0], [1, 1, 1]);
+  const options = {
+    name: "body", category: "robot", tags: { kind: "custom" },
+    explode: [0, 0, 1], label: "Robot body",
+  };
+  const result = Assembly.from(left, right, options);
+  expect(result).toEqual({ ...options, parts: [left, right] });
+  expect(Assembly.from(...source.parts, options)).toEqual(result);
+  result.parts[0].geometry.vertices[0][0] = 999;
+  result.parts[0].tags.component = "changed";
+  result.tags.kind = "changed";
+  result.explode[2] = 999;
+  expect(left.geometry.vertices[0][0]).not.toBe(999);
+  expect(left.tags.component).toBe("default");
+  expect(options.tags.kind).toBe("custom");
+  expect(options.explode).toEqual([0, 0, 1]);
+  const model = Model.new();
+  model.addAssembly(Assembly.from(left, right, options));
+  expect(describe(model).triangleCount).toBeGreaterThan(0);
+});
+
+test("model.addAssembly registers assemblies and rejects duplicate paths", () => {
+  const model = Model.new();
+  const body = Assembly.from({ name: "body", category: "robot" });
+  expect(model.addAssembly(body)).toBe(body);
+  expect(model.assemblies).toEqual([body]);
+  expect(() => model.addAssembly(body)).toThrow("Duplicate assembly: robot/body");
+  model.addAssembly(Assembly.from({ name: "body", category: "other" }));
+  expect(() => model.addAssembly({ ...body, name: "bad/name" })).toThrow();
+  expect(model.assemblies).toHaveLength(2);
+  expect(JSON.parse(JSON.stringify(model))).toEqual(structuredClone(model));
+  expect(describe(model).assemblies).toHaveLength(2);
+});
+
+test("Assembly.from validates path segments", () => {
+  expect(() => Assembly.from({ name: "" })).toThrow();
+  expect(() => Assembly.from({ name: "bad/name" })).toThrow();
+  expect(() => Assembly.from({ name: "body", category: "" })).toThrow();
+  expect(() => Assembly.from({ name: "body", category: "bad/category" })).toThrow();
 });
 
 test("presets and legacy factory remain compatible", () => {
