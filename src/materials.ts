@@ -1,4 +1,21 @@
-import type { Materials } from "./types.ts";
+import type { Material as MaterialData, Materials } from "./types.ts";
+
+export type Material = MaterialData;
+export type MaterialOptions = Partial<MaterialData>;
+
+export const Material = {
+  new(opts: MaterialOptions = {}): MaterialData {
+    return {
+      color: opts.color ?? "#b0b0b0",
+      roughness: opts.roughness ?? 0.65,
+      metalness: opts.metalness ?? 0,
+      ...(opts.emissive !== undefined ? { emissive: opts.emissive } : {}),
+      ...(opts.emissiveIntensity !== undefined
+        ? { emissiveIntensity: opts.emissiveIntensity }
+        : {}),
+    };
+  },
+};
 // Authored sRGB colors; opaque PBR presets, including the dark glass-like finish.
 // Renamed neutral finishes retain the source toolkit's numeric values.
 const presets: Materials = {

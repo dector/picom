@@ -57,10 +57,13 @@ A responsive JavaScript editor with live Three.js preview, touch orbit/zoom, exa
 ## Build a model
 
 ```ts
-import { createModel, assembly, b, part, cylinder, describe } from "@dector/picom";
+import { Material, Model, assembly, b, part, cylinder, describe } from "@dector/picom";
 
-const model = createModel("Stand", {
-  steel: { color: "#b2b5ae", roughness: 0.56, metalness: 0.6 },
+const steel = Material.new({
+  color: "#b2b5ae", roughness: 0.56, metalness: 0.6,
+});
+const model = Model.new("Stand", {
+  materials: { steel },
 });
 const base = assembly(model, "base", "structure");
 b(base, "plinth", [0, 0, 0.1], [1, 1, 0.2], "steel", "solid");
@@ -101,7 +104,9 @@ The old fixed wheel arch is now `band(outer, inner, normal, depth)`: two open co
 
 ### Materials
 
-`MATERIALS` is an immutable preset palette. Pass it (or a selected subset) to `createModel`; palettes are cloned. `recolorMaterials(palette, names, '#rrggbb', referenceName?)` returns a new palette, preserving relative sRGB channel offsets and emission differences. The reference defaults to the first selected name. Colors are six-digit sRGB hex values. The `glass` preset is an opaque, glass-like finish, not physical transparency.
+`Material.new(options?)` creates a plain material, defaulting to color `#b0b0b0`, roughness `0.65`, and metalness `0`. Emission fields are optional. `Model.new(name?, { materials }?)` creates an empty model with a cloned palette; omitting materials supplies a `default` material. Parts still reference materials by palette name. `createModel(name, materials)` is deprecated but remains compatible.
+
+`MATERIALS` is an immutable preset palette. Pass it (or a selected subset) as `Model.new("Name", { materials: MATERIALS })`; palettes are cloned. `recolorMaterials(palette, names, '#rrggbb', referenceName?)` returns a new palette, preserving relative sRGB channel offsets and emission differences. The reference defaults to the first selected name. Colors are six-digit sRGB hex values. The `glass` preset is an opaque, glass-like finish, not physical transparency.
 
 ### Visibility and inspection
 

@@ -2,20 +2,27 @@ import type { ModelDraft, Description, Materials, Vector } from "./types.ts";
 import { boundsOf, triangleCount } from "./bounds.ts";
 import { visibilityTree } from "./visibility.ts";
 import { pathSegment } from "./parts.ts";
+import { Material } from "./materials.ts";
 
-export function createModel(
-  name = "Model",
-  materials: Materials = {
-    default: { color: "#b0b0b0", roughness: 0.65, metalness: 0 },
+export interface ModelOptions {
+  materials?: Materials;
+}
+
+export const Model = {
+  new(name = "Model", options: ModelOptions = {}): ModelDraft {
+    return {
+      name,
+      schemaVersion: 1,
+      coordinates: { up: "+z", units: "meters" },
+      materials: structuredClone(options.materials ?? { default: Material.new() }),
+      assemblies: [],
+    };
   },
-): ModelDraft {
-  return {
-    name,
-    schemaVersion: 1,
-    coordinates: { up: "+z", units: "meters" },
-    materials: structuredClone(materials),
-    assemblies: [],
-  };
+};
+
+/** @deprecated Use Model.new(name, { materials }) instead. */
+export function createModel(name = "Model", materials?: Materials): ModelDraft {
+  return Model.new(name, { materials });
 }
 export interface DescribeOptions {
   scale?: number;

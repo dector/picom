@@ -4,5 +4,6 @@ export * from "./parts.ts";
 export * from "./bounds.ts";
 export * from "./model.ts";
 export * from "./materials.ts";
+export { Material } from "./materials.ts";
 export * from "./visibility.ts";
 export * from "./dimensions.ts";
