@@ -30,6 +30,22 @@ bun run typecheck
 bun run example  # prints a desk sculpture as JSON
 ```
 
+## Examples
+
+Standalone examples print model descriptions as JSON:
+
+```sh
+bun examples/cube.ts
+bun examples/table.ts
+bun examples/robot.ts
+bun examples/tower.ts
+bun examples/vase.ts
+```
+
+These five examples also appear in the playground picker, using the same source
+files. They cover boxes, loops, assemblies/explosion offsets, rods/cylinders,
+and revolved profiles. The vase has an open bottom.
+
 ## Browser playground
 
 ```sh

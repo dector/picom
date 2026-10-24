@@ -1,4 +1,23 @@
+import cube from "../../examples/cube.ts?raw";
+import table from "../../examples/table.ts?raw";
+import robot from "../../examples/robot.ts?raw";
+import tower from "../../examples/tower.ts?raw";
+import vase from "../../examples/vase.ts?raw";
+
+// Standalone examples import the core and print JSON. The playground injects
+// core functions and expects a returned description instead.
+export function playgroundSource(source: string): string {
+  return source
+    .replace(/^import .* from "\.\.\/src\/index\.js";\r?\n/m, "")
+    .replace("console.log(JSON.stringify(description, null, 2));", "return description;");
+}
+
 export const examples: Record<string, string> = {
+  Cube: playgroundSource(cube),
+  Table: playgroundSource(table),
+  Robot: playgroundSource(robot),
+  Watchtower: playgroundSource(tower),
+  Vase: playgroundSource(vase),
   "Desk sculpture": `// All picom functions are ready to use. No imports needed.
 const model = createModel("Desk sculpture", {
   stone: { color: "#a6aaa4", roughness: 0.9, metalness: 0 },
