@@ -2,6 +2,7 @@
   "name": "picom",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Renderer-independent procedural low-poly mesh toolkit",
   "exports": {
