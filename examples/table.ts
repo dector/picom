@@ -6,7 +6,7 @@ const model = Model.new("Table", {
     steel: { color: "#48515b", roughness: 0.4, metalness: 0.7 },
   },
 });
-const table = model.addAssembly(
+const table = model.with(
   Assembly.new({ name: "table", category: "furniture" }),
 );
 table.group("top").part("top", g.box([0, 0, 0.75], [1.4, 0.8, 0.08], 0.018), {

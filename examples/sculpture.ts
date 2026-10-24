@@ -6,14 +6,14 @@ const model = Model.new("Desk sculpture", {
     brass: { color: "#bba158", roughness: 0.3, metalness: 0.8 },
   },
 });
-const base = model.addAssembly(
+const base = model.with(
   Assembly.new({ name: "pedestal", category: "structure" }),
 );
 base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.03), {
   material: "stone",
   component: "base",
 });
-const sculpture = model.addAssembly(
+const sculpture = model.with(
   Assembly.new({
     name: "sculpture",
     category: "decoration",

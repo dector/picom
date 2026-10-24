@@ -11,7 +11,7 @@ const steel = Material.new({
 const model = Model.new("Stand", {
   materials: { steel },
 });
-const base = model.addAssembly(Assembly.new({
+const base = model.with(Assembly.new({
   name: "base",
   category: "structure",
 }));
@@ -45,12 +45,12 @@ const body = Assembly.from(...parts, {
   explode: [0, 0, 0.5],
   label: "Robot body",
 });
-model.addAssembly(body);
+model.with(body);
 ```
 
 `Assembly.new({ name: "empty" })` creates an empty assembly, accepting only an options object (no parts). It uses the same defaults, validation, and copying as `Assembly.from`. Zero parts is also valid with `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`.
 
-`model.addAssembly(assembly)` registers and returns the same assembly, rejecting duplicate paths (`category/name`). Because it preserves the builder type, chaining works: `model.addAssembly(Assembly.new({ name: "base" })).part(...)`. `describe` also checks uniqueness.
+`model.with(assembly)` registers and returns the same assembly, rejecting duplicate paths (`category/name`). Because it preserves the builder type, chaining works: `model.with(Assembly.new({ name: "base" })).part(...)`. `describe` also checks uniqueness.
 
 ## Parts
 
@@ -61,7 +61,7 @@ model.addAssembly(body);
 - `component` — explicit visibility path for compatibility; prefer groups.
 
 ```ts
-const base = model.addAssembly(Assembly.new({ name: "base" }));
+const base = model.with(Assembly.new({ name: "base" }));
 base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2]), {
   material: "steel",
   tags: { kind: "support" },
@@ -85,7 +85,7 @@ The supplied geometry is retained by reference; it is not cloned. Reusing or int
 `assembly.group(name)` creates a lightweight handle for a visibility group. `group.part(name, geometry, options?)` still adds to the original `assembly.parts`; its `tags.component` becomes the group path. Nested `group.group(name)` calls join names with `/`.
 
 ```ts
-const table = model.addAssembly(Assembly.new({ name: "table" }));
+const table = model.with(Assembly.new({ name: "table" }));
 table.group("top").part("top", g.box([0, 0, 0.75], [1.4, 0.8, 0.08]), {
   material: "wood",
 });
@@ -126,7 +126,7 @@ The legacy `assembly`, `part`, `b`, `r`, `pane`, and `createModel` helpers remai
 | Legacy | Replacement |
 | --- | --- |
 | `createModel(name, materials)` | `Model.new(name, { materials })` |
-| `assembly(model, id, category, tags, explode)` | `model.addAssembly(Assembly.new({ name: id, category, tags, explode }))` |
+| `assembly(model, id, category, tags, explode)` | `model.with(Assembly.new({ name: id, category, tags, explode }))` |
 | `part(a, name, geometry, material, component, extra)` | `a.part(name, geometry, { material, component, tags: extra })` |
 | `b(a, name, center, size, material, component, bevel)` | `a.part(name, g.box(center, size, bevel), { material, component })` |
 | `r(a, name, start, end, width, material, component)` | `a.part(name, g.rod(start, end, width), { material, component })` |

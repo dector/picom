@@ -5,7 +5,7 @@ const model = Model.new("Vase", {
     clay: { color: "#cb8065", roughness: 0.9, metalness: 0 },
   },
 });
-const vase = model.addAssembly(
+const vase = model.with(
   Assembly.new({ name: "vase", category: "pottery" }),
 );
 

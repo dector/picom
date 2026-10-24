@@ -6,7 +6,7 @@ const model = Model.new("Watchtower", {
     wood: { color: "#906747", roughness: 0.85, metalness: 0 },
   },
 });
-const tower = model.addAssembly(
+const tower = model.with(
   Assembly.new({ name: "tower", category: "structure" }),
 );
 tower.part("base", g.cylinder([0, 0, 0.12], 0.85, 0.24), {

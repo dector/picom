@@ -72,7 +72,7 @@ test("group parts use defaults and do not inherit options or transforms", () => 
 
 test("empty group handles are not persisted or shown in the visibility tree", () => {
   const model = Model.new();
-  const base = model.addAssembly(Assembly.new({ name: "empty" }));
+  const base = model.with(Assembly.new({ name: "empty" }));
   const handle: PartGroup = base.group("unused").group("nested");
 
   expect(handle).toBeDefined();
@@ -112,7 +112,7 @@ test("group names must be single nonempty path segments", () => {
 
 test("component paths accept segments and reject empty segments", () => {
   const model = Model.new();
-  const base = model.addAssembly(
+  const base = model.with(
     Assembly.new({ name: "paths", category: "robot" }),
   );
   const created = base.part("toe", g.box([0, 0, 0], [1, 1, 1]), {
@@ -217,7 +217,7 @@ test("flat components keep their existing visibility tree shape", () => {
 
 test("nested visibility hides children with parents and preserves parent parts", () => {
   const model = Model.new();
-  const base = model.addAssembly(
+  const base = model.with(
     Assembly.new({ name: "robot", category: "bot" }),
   );
   const legs = base.group("legs");
@@ -254,9 +254,9 @@ test("nested visibility hides children with parents and preserves parent parts",
   expect(visibleDimensions(description, visibility)).toEqual([0, 0, 0]);
 });
 
-test("addAssembly keeps builders while clones stay flat data", () => {
+test("with keeps builders while clones stay flat data", () => {
   const model = Model.new();
-  const base: AssemblyBuilder = model.addAssembly(
+  const base: AssemblyBuilder = model.with(
     Assembly.new({ name: "robot" }),
   );
   const legs: PartGroup = base.group("legs");

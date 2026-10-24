@@ -102,7 +102,7 @@ function partGroup(assembly: Assembly, path: string): PartGroup {
   };
 }
 
-/** @deprecated Use Assembly.from(options) and model.addAssembly(assembly) instead. */
+/** @deprecated Use Assembly.from(options) and model.with(assembly) instead. */
 export function assembly(
   model: ModelDraft,
   id: string,

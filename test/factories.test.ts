@@ -69,7 +69,7 @@ test("Assembly.new creates empty assemblies with independent options", () => {
   expect(options.explode).toEqual([0, 0, 1]);
   expect(Assembly.new(options).parts).toEqual([]);
   const model = Model.new();
-  expect(model.addAssembly(result)).toBe(result);
+  expect(model.with(result)).toBe(result);
 });
 
 test("Assembly.new validates path segments", () => {
@@ -103,18 +103,18 @@ test("Assembly.from accepts zero or multiple parts with trailing options", () =>
   expect(options.tags.kind).toBe("custom");
   expect(options.explode).toEqual([0, 0, 1]);
   const model = Model.new();
-  model.addAssembly(Assembly.from(left, right, options));
+  model.with(Assembly.from(left, right, options));
   expect(describe(model).triangleCount).toBeGreaterThan(0);
 });
 
-test("model.addAssembly registers assemblies and rejects duplicate paths", () => {
+test("model.with registers assemblies and rejects duplicate paths", () => {
   const model = Model.new();
   const body = Assembly.from({ name: "body", category: "robot" });
-  expect(model.addAssembly(body)).toBe(body);
+  expect(model.with(body)).toBe(body);
   expect(model.assemblies).toEqual([body]);
-  expect(() => model.addAssembly(body)).toThrow("Duplicate assembly: robot/body");
-  model.addAssembly(Assembly.from({ name: "body", category: "other" }));
-  expect(() => model.addAssembly({ ...body, name: "bad/name" })).toThrow();
+  expect(() => model.with(body)).toThrow("Duplicate assembly: robot/body");
+  model.with(Assembly.from({ name: "body", category: "other" }));
+  expect(() => model.with({ ...body, name: "bad/name" })).toThrow();
   expect(model.assemblies).toHaveLength(2);
   expect(JSON.parse(JSON.stringify(model))).toEqual(structuredClone(model));
   expect(describe(model).assemblies).toHaveLength(2);

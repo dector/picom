@@ -28,7 +28,7 @@ const steel = Material.new({
   color: "#b2b5ae", roughness: 0.56, metalness: 0.6,
 });
 const model = Model.new("Stand", { materials: { steel } });
-const base = model.addAssembly(Assembly.new({ name: "base", category: "structure" }));
+const base = model.with(Assembly.new({ name: "base", category: "structure" }));
 const frame = base.group("frame");
 
 frame.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.018), {
@@ -44,7 +44,7 @@ console.log(JSON.stringify(description));
 
 `assembly.part(name, geometry, { material, tags })` adds a part and returns it. Material defaults to `"default"`, tags are copied, and geometry is retained by reference. `assembly.group(name)` returns a lightweight visibility group handle; use `group.part(...)` to attach parts to the same assembly with `tags.component` set to the group path. Groups nest with `group.group(name)`. Groups have no geometry, transforms, explosion offsets, or inherited defaults, and empty groups are not stored. Explicit `component` on `assembly.part` remains supported for compatibility, including validated slash paths; prefer groups for new code.
 
-`Assembly.new(options)` creates an empty standalone assembly. `Assembly.from(...parts, options)` creates one from parts. `model.addAssembly(...)` registers and returns the same assembly, preserving its builder type. Builder methods `.part` and `.group` are non-enumerable, so they are absent from JSON and clones; reconstruct with `Assembly.from(...parts, options)`.
+`Assembly.new(options)` creates an empty standalone assembly. `Assembly.from(...parts, options)` creates one from parts. `model.with(...)` registers and returns the same assembly, preserving its builder type. Builder methods `.part` and `.group` are non-enumerable, so they are absent from JSON and clones; reconstruct with `Assembly.from(...parts, options)`.
 
 Geometry functions are exported directly, and the same functions are available as `geometry` and `g`; examples prefer `g`. The legacy `assembly`, `createModel`, `part`, `b`, `r`, and `pane` helpers remain available but are deprecated.
 

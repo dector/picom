@@ -48,9 +48,9 @@ test("invalid components are rejected before adding parts", () => {
   expect(base.parts).toEqual([]);
 });
 
-test("addAssembly preserves builder types, references, and serializable data", () => {
+test("with preserves builder types, references, and serializable data", () => {
   const model = Model.new();
-  const base: AssemblyBuilder = model.addAssembly(Assembly.new({ name: "base" }));
+  const base: AssemblyBuilder = model.with(Assembly.new({ name: "base" }));
   base.part("cube", g.box([0, 0, 0], [1, 1, 1]));
   expect(model.assemblies[0]).toBe(base);
   expect(Object.getOwnPropertyDescriptor(base, "part")?.enumerable).toBe(false);

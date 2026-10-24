@@ -7,7 +7,7 @@ const model = Model.new("Robot", {
     yellow: { color: "#ffd166", roughness: 0.5, metalness: 0 },
   },
 });
-const body = model.addAssembly(
+const body = model.with(
   Assembly.new({ name: "body", category: "robot" }),
 );
 body.part("torso", g.box([0, 0, 0.95], [0.6, 0.35, 0.7], 0.018), {
@@ -18,7 +18,7 @@ body.part("badge", g.box([0, -0.185, 1.05], [0.18, 0.03, 0.12], 0.018), {
 });
 
 // Explosion offsets move assemblies apart in the playground's exploded view.
-const head = model.addAssembly(
+const head = model.with(
   Assembly.new({ name: "head", category: "robot", explode: [0, 0, 0.5] }),
 );
 head.part("head", g.box([0, 0, 1.55], [0.5, 0.4, 0.4], 0.018), {
@@ -32,7 +32,7 @@ for (const x of [-0.13, 0.13]) {
   );
 }
 for (const side of [-1, 1]) {
-  const arm = model.addAssembly(
+  const arm = model.with(
     Assembly.new({
       name: `arm-${side}`,
       category: "robot",
@@ -42,7 +42,7 @@ for (const side of [-1, 1]) {
   arm.part("arm", g.box([side * 0.43, 0, 0.95], [0.18, 0.25, 0.6], 0.018), {
     material: "blue",
   });
-  const leg = model.addAssembly(
+  const leg = model.with(
     Assembly.new({
       name: `leg-${side}`,
       category: "robot",

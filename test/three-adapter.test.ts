@@ -41,7 +41,7 @@ test("constructs final meshes without a renderer or DOM", () => {
 });
 test("applies nested component visibility paths", () => {
   const model = Model.new();
-  const base = model.addAssembly(
+  const base = model.with(
     Assembly.new({ name: "robot", category: "bot" }),
   );
   const legs = base.group("legs");

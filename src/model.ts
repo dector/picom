@@ -9,7 +9,7 @@ export interface ModelOptions {
 }
 
 export interface ModelBuilder extends ModelDraft {
-  addAssembly<T extends Assembly>(assembly: T): T;
+  with<T extends Assembly>(assembly: T): T;
 }
 
 export const Model = {
@@ -22,7 +22,7 @@ export const Model = {
       assemblies: [],
     };
     // Keep methods out of JSON and structuredClone's enumerable data.
-    Object.defineProperty(model, "addAssembly", {
+    Object.defineProperty(model, "with", {
       value<T extends Assembly>(assembly: T): T {
         const id = `${pathSegment(assembly.category)}/${pathSegment(assembly.name)}`;
         if (model.assemblies.some((a) => `${a.category}/${a.name}` === id))

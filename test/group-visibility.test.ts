@@ -7,7 +7,7 @@ import type { Visibility } from "../src/index.ts";
 
 function fixture() {
   const model = Model.new();
-  const assembly = model.addAssembly(Assembly.new({ name: "table", category: "furniture" }));
+  const assembly = model.with(Assembly.new({ name: "table", category: "furniture" }));
   const legs = assembly.group("legs");
   legs.part("brace", g.box([0, 0, 2], [2, 1, 1], 0));
   legs.group("front").part("leg", g.box([0, 0, 0], [1, 1, 1], 0));

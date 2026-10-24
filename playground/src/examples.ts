@@ -26,7 +26,7 @@ const model = Model.new("Desk sculpture", {
   },
 });
 
-const base = model.addAssembly(
+const base = model.with(
   Assembly.new({ name: "pedestal", category: "structure" }),
 );
 base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.03), {
@@ -34,7 +34,7 @@ base.part("plinth", g.box([0, 0, 0.1], [1, 1, 0.2], 0.03), {
   component: "base",
 });
 
-const sculpture = model.addAssembly(
+const sculpture = model.with(
   Assembly.new({ name: "sculpture", category: "decoration" }),
 );
 sculpture.part("stem", g.rod([0, 0, 0.2], [0, 0, 1.2], 0.06), {
@@ -55,7 +55,7 @@ const model = Model.new("Spiral tower", {
     blue: { color: "#8bbbc7", roughness: 0.6, metalness: 0.1 },
   },
 });
-const tower = model.addAssembly(
+const tower = model.with(
   Assembly.new({ name: "tower", category: "structure" }),
 );
 const count = 24;
@@ -75,7 +75,7 @@ return describe(model, { ground: true });`,
     ground: { color: "#c5c3ac", roughness: 1, metalness: 0 },
   },
 });
-const island = model.addAssembly(
+const island = model.with(
   Assembly.new({ name: "island", category: "landscape" }),
 );
 island.part("ground", g.box([0, 0, 0], [3, 2.5, 0.15], 0.08), {
@@ -86,7 +86,7 @@ for (let i = 0; i < 7; i++) {
   const x = Math.sin(i * 2.4) * 1.05;
   const y = Math.cos(i * 2.4) * 0.8;
   const height = 0.7 + (i % 3) * 0.2;
-  const tree = model.addAssembly(
+  const tree = model.with(
     Assembly.new({ name: "tree-" + i, category: "trees" }),
   );
   tree.part("trunk", g.rod([x, y, 0], [x, y, height], 0.09), {
