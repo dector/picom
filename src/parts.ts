@@ -43,6 +43,7 @@ export function pathSegment(value: string): string {
     );
   return value;
 }
+/** @deprecated Use Assembly.from(options) and model.addAssembly(assembly) instead. */
 export function assembly(
   model: ModelDraft,
   id: string,

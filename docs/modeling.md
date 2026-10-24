@@ -3,7 +3,7 @@
 ## Build a model
 
 ```ts
-import { Material, Model, assembly, b, part, cylinder, describe } from "@dector/picom";
+import { Material, Model, Assembly, b, part, cylinder, describe } from "@dector/picom";
 
 const steel = Material.new({
   color: "#b2b5ae", roughness: 0.56, metalness: 0.6,
@@ -11,7 +11,8 @@ const steel = Material.new({
 const model = Model.new("Stand", {
   materials: { steel },
 });
-const base = assembly(model, "base", "structure");
+const base = Assembly.from({ name: "base", category: "structure" });
+model.addAssembly(base);
 b(base, "plinth", [0, 0, 0.1], [1, 1, 0.2], "steel", "solid");
 part(base, "column", cylinder([0, 0, 0.7], 0.08, 1), "steel", "solid");
 
@@ -38,7 +39,7 @@ const body = Assembly.from(...parts, {
 model.addAssembly(body);
 ```
 
-Zero parts is valid: `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`. `model.addAssembly(assembly)` registers and returns the assembly, rejecting duplicate paths (`category/name`). It retains the supplied assembly reference. `describe` also checks uniqueness. The existing `assembly(model, id, category?, tags?, explode?)` helper still creates and registers an empty assembly directly.
+Zero parts is valid: `Assembly.from({ name: "empty" })`. Names and categories must be nonempty and cannot contain `/`. `model.addAssembly(assembly)` registers and returns the assembly, rejecting duplicate paths (`category/name`). It retains the supplied assembly reference. `describe` also checks uniqueness. The `assembly(model, id, category?, tags?, explode?)` helper is deprecated but remains available for compatibility. Use `Assembly.from({ name: id, category, tags, explode })` followed by `model.addAssembly(...)` instead.
 
 ## Geometry conventions and limits
 
