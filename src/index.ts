@@ -1,8 +1,8 @@
-export type * from "./types.js";
-export * from "./geometry.js";
-export * from "./parts.js";
-export * from "./bounds.js";
-export * from "./model.js";
-export * from "./materials.js";
-export * from "./visibility.js";
-export * from "./dimensions.js";
+export type * from "./types.ts";
+export * from "./geometry.ts";
+export * from "./parts.ts";
+export * from "./bounds.ts";
+export * from "./model.ts";
+export * from "./materials.ts";
+export * from "./visibility.ts";
+export * from "./dimensions.ts";

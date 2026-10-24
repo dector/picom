@@ -5,8 +5,8 @@ import type {
   Tags,
   Vector,
   Part,
-} from "./types.js";
-import { box, slab, rod } from "./geometry.js";
+} from "./types.ts";
+import { box, slab, rod } from "./geometry.ts";
 
 // IDs and categories are path segments, not paths; arbitrary semantic tags are retained.
 export function pathSegment(value: string): string {
@@ -58,7 +58,7 @@ export const b = (
   material = "default",
   component = "default",
   bevel = 0.018,
-) => part(a, name, box(center, size, bevel), material, component);
+): Part => part(a, name, box(center, size, bevel), material, component);
 export const r = (
   a: Assembly,
   name: string,
@@ -67,7 +67,7 @@ export const r = (
   width = 0.05,
   material = "default",
   component = "default",
-) => part(a, name, rod(start, end, width), material, component);
+): Part => part(a, name, rod(start, end, width), material, component);
 export const pane = (
   a: Assembly,
   name: string,
@@ -76,4 +76,4 @@ export const pane = (
   material = "default",
   component = "default",
   depth = 0.012,
-) => part(a, name, slab(points, normal, depth), material, component);
+): Part => part(a, name, slab(points, normal, depth), material, component);

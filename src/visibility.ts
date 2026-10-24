@@ -1,11 +1,12 @@
-import type { Assembly, Part, Visibility, VisibilityNode } from "./types.js";
+import type { Assembly, Part, Visibility, VisibilityNode } from "./types.ts";
 // Serializable category → assembly → component tree; caller-owned labels and categories.
-export const title = (value: string) =>
+export const title = (value: string): string =>
   value.replaceAll("_", " ").replace(/^\w/, (c) => c.toUpperCase());
-export const componentOf = (part: Part) => part.tags.component ?? "default";
-export const assemblyPath = (assembly: Assembly) =>
+export const componentOf = (part: Part): string =>
+  part.tags.component ?? "default";
+export const assemblyPath = (assembly: Assembly): string =>
   `${assembly.category}/${assembly.name}`;
-export const componentPath = (assembly: Assembly, part: Part) =>
+export const componentPath = (assembly: Assembly, part: Part): string =>
   `${assemblyPath(assembly)}/${componentOf(part)}`;
 export function visibilityTree(
   assemblies: Assembly[],
@@ -33,7 +34,7 @@ export function visibilityTree(
   }));
 }
 // Missing keys are visible, so existing category-only states remain supported.
-export function isVisible(visibility: Visibility, path: string) {
+export function isVisible(visibility: Visibility, path: string): boolean {
   const segments = path.split("/");
   return segments.every(
     (_, i) => visibility[segments.slice(0, i + 1).join("/")] !== false,
@@ -59,7 +60,7 @@ export function visibilityStatus(
 export function invertVisibility(
   visibility: Visibility,
   tree: VisibilityNode[],
-) {
+): void {
   const leaves: [VisibilityNode, boolean][] = [];
   function collect(nodes: VisibilityNode[]) {
     for (const node of nodes) {
@@ -76,7 +77,7 @@ export function setVisibility(
   visibility: Visibility,
   node: VisibilityNode,
   checked: boolean,
-) {
+): void {
   visibility[node.id] = checked;
   for (const child of node.children) setVisibility(visibility, child, checked);
   // Enabling a descendant must also release any hidden ancestor gates.

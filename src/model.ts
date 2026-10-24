@@ -1,7 +1,7 @@
-import type { ModelDraft, Description, Materials, Vector } from "./types.js";
-import { boundsOf, triangleCount } from "./bounds.js";
-import { visibilityTree } from "./visibility.js";
-import { pathSegment } from "./parts.js";
+import type { ModelDraft, Description, Materials, Vector } from "./types.ts";
+import { boundsOf, triangleCount } from "./bounds.ts";
+import { visibilityTree } from "./visibility.ts";
+import { pathSegment } from "./parts.ts";
 
 export function createModel(
   name = "Model",

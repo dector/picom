@@ -1,16 +1,16 @@
-import type { Vector, Geometry } from "./types.js";
+import type { Vector, Geometry } from "./types.ts";
 // Pure final-mesh helpers. Coordinates in meters; no renderer or external dependencies.
-export const add = (a: Vector, b: Vector) => a.map((x, i) => x + b[i]);
-export const sub = (a: Vector, b: Vector) => a.map((x, i) => x - b[i]);
-export const mul = (a: Vector, s: number) => a.map((x) => x * s);
-export const dot = (a: Vector, b: Vector) =>
+export const add = (a: Vector, b: Vector): Vector => a.map((x, i) => x + b[i]);
+export const sub = (a: Vector, b: Vector): Vector => a.map((x, i) => x - b[i]);
+export const mul = (a: Vector, s: number): Vector => a.map((x) => x * s);
+export const dot = (a: Vector, b: Vector): number =>
   a.reduce((s, x, i) => s + x * b[i], 0);
-export const cross = (a: Vector, b: Vector) => [
+export const cross = (a: Vector, b: Vector): Vector => [
   a[1] * b[2] - a[2] * b[1],
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
-export const unit = (a: Vector) => {
+export const unit = (a: Vector): Vector => {
   const length = Math.hypot(...a);
   if (!Number.isFinite(length) || length === 0)
     throw RangeError("Direction must be finite and nonzero");
@@ -76,7 +76,7 @@ export function triangulate(points: Vector[]): number[][] {
   tris.push(ids);
   return tris;
 }
-export function convex(vertices: Vector[], faces: number[][]) {
+export function convex(vertices: Vector[], faces: number[][]): Geometry {
   const center = average(vertices);
   return mesh(
     vertices,
@@ -93,7 +93,11 @@ export function convex(vertices: Vector[], faces: number[][]) {
     ),
   );
 }
-export function slab(points: Vector[], normal: Vector, depth = 0.015) {
+export function slab(
+  points: Vector[],
+  normal: Vector,
+  depth = 0.015,
+): Geometry {
   const n = points.length,
     vertices = [
       ...points.map((p) => [...p]),
@@ -115,7 +119,7 @@ export function slab(points: Vector[], normal: Vector, depth = 0.015) {
   });
   return mesh(vertices, faces);
 }
-export function box(center: Vector, size: Vector, bevel = 0.02) {
+export function box(center: Vector, size: Vector, bevel = 0.02): Geometry {
   const h = size.map((x) => x / 2),
     b = Math.min(bevel, ...h.map((x) => x * 0.8));
   if (b <= 0) {
@@ -207,7 +211,7 @@ export function transform(
     triangles: g.triangles.map((t) => [...t]),
   };
 }
-export function frame(axis: Vector) {
+export function frame(axis: Vector): Vector[] {
   const n = unit(axis),
     u = unit(cross(Math.abs(n[2]) < 0.9 ? [0, 0, 1] : [0, 1, 0], n));
   return [u, cross(n, u), n];
@@ -218,7 +222,7 @@ export function cylinder(
   depth: number,
   axis: Vector = [0, 0, 1],
   segments = 8,
-) {
+): Geometry {
   if (!Number.isInteger(segments) || segments < 3)
     throw RangeError("Segments must be an integer >= 3");
   const [u, v, n] = frame(axis),
@@ -246,7 +250,12 @@ export function cylinder(
   }
   return mesh(vs, faces);
 }
-export function rod(a: Vector, b: Vector, width = 0.05, bevel = 0.01) {
+export function rod(
+  a: Vector,
+  b: Vector,
+  width = 0.05,
+  bevel = 0.01,
+): Geometry {
   const delta = sub(b, a),
     [u, v, n] = frame(delta);
   return transform(
@@ -258,7 +267,7 @@ export function rod(a: Vector, b: Vector, width = 0.05, bevel = 0.01) {
       ),
   );
 }
-export function loft(sections: Vector[][]) {
+export function loft(sections: Vector[][]): Geometry {
   // Equal-order convex section loops.
   if (
     sections.length < 2 ||
@@ -290,7 +299,7 @@ export function band(
   inner: Vector[],
   normal: Vector,
   depth = 0.02,
-) {
+): Geometry {
   if (outer.length < 2 || inner.length < 2)
     throw RangeError("Band contours need at least two points");
   return slab([...outer, ...[...inner].reverse()], normal, depth);
@@ -302,7 +311,7 @@ export function revolve(
   axis: Vector,
   profile: number[][],
   segments = 20,
-) {
+): Geometry {
   if (!Number.isInteger(segments) || segments < 3)
     throw RangeError("Segments must be an integer >= 3");
   if (

@@ -1,4 +1,4 @@
-import type { Materials } from "./types.js";
+import type { Materials } from "./types.ts";
 // Authored sRGB colors; opaque PBR presets, including the dark glass-like finish.
 // Renamed neutral finishes retain the source toolkit's numeric values.
 const presets: Materials = {

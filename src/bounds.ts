@@ -1,4 +1,4 @@
-import type { Part, Bounds, Vector } from "./types.js";
+import type { Part, Bounds, Vector } from "./types.ts";
 // Empty geometry has zero bounds, so descriptions remain finite and serializable.
 export function boundsOf(parts: readonly Part[]): Bounds {
   const min = [Infinity, Infinity, Infinity],

@@ -1,9 +1,10 @@
-import type { Description, ModelState } from "./types.js";
+import type { Description, ModelState } from "./types.ts";
+// @deno-types="npm:@types/three@^0.180.0"
 import * as THREE from "three";
-import { assemblyPath, componentPath, isVisible } from "./visibility.js";
+import { assemblyPath, componentPath, isVisible } from "./visibility.ts";
 
 // Optional renderer adapter. The core does not import Three.js.
-export function createObject(description: Description) {
+export function createObject(description: Description): THREE.Group {
   const root = new THREE.Group();
   root.name = description.name;
   try {
@@ -52,7 +53,7 @@ export function createObject(description: Description) {
     throw error;
   }
 }
-export function applyState(root: THREE.Object3D, state: ModelState) {
+export function applyState(root: THREE.Object3D, state: ModelState): void {
   for (const a of root.children) {
     a.visible = isVisible(state.visibility, a.userData.visibilityPath);
     a.position.fromArray(a.userData.explode).multiplyScalar(state.explode);
@@ -60,7 +61,7 @@ export function applyState(root: THREE.Object3D, state: ModelState) {
       mesh.visible = isVisible(state.visibility, mesh.userData.visibilityPath);
   }
 }
-export function disposeObject(root: THREE.Object3D) {
+export function disposeObject(root: THREE.Object3D): void {
   const geometries = new Set<THREE.BufferGeometry>(),
     materials = new Set<THREE.Material>();
   root.traverse((o) => {
@@ -75,7 +76,7 @@ export function disposeObject(root: THREE.Object3D) {
   for (const geometry of geometries) geometry.dispose();
   for (const material of materials) material.dispose();
 }
-export function visibleTriangles(root: THREE.Object3D) {
+export function visibleTriangles(root: THREE.Object3D): number {
   let count = 0;
   root.traverseVisible((o) => {
     const mesh = o as THREE.Mesh;
